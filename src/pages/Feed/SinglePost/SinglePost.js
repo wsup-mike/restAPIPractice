@@ -34,6 +34,12 @@ class SinglePost extends Component {
       });
   }
 
+
+
+
+
+  
+
   render() {
     return (
       <section className="single-post">
