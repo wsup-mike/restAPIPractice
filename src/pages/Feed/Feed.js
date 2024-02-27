@@ -36,11 +36,38 @@ class Feed extends Component {
       .catch(this.catchError);
 
     this.loadPosts();
-    openSocket("http://localhost:8080");
+    // 1) set to new variable name to capture the object
+    const socket = openSocket("http://localhost:8080");
+    // 2) set up to capture the 'post' from the data package sent
+    socket.on("posts", (data) => {
+      if (data.action === "create") {
+        this.addPost(data.post);
+      }
+    });
     console.log(
       "socket.io is open for connection and ready to connect with server."
     );
+
+    // To listen for incoming data from socket.io in app
   }
+
+  addPost = (post) => {
+    // To render the post to the screen
+    this.setState((prevState) => {
+      const updatedPosts = [...prevState.posts];
+      // Pagination here
+      if (prevState.postPage === 1) {
+        if (prevState.posts.length >= 2) {
+          updatedPosts.pop();
+        }
+        updatedPosts.unshift(post);
+      }
+      return {
+        posts: updatedPosts,
+        totalPosts: prevState.totalPosts + 1,
+      };
+    });
+  };
 
   loadPosts = (direction) => {
     if (direction) {
@@ -275,7 +302,7 @@ class Feed extends Component {
                 <Post
                   key={post._id}
                   id={post._id}
-                  author={post.creator}
+                  author={post.creator.name}
                   date={new Date(post.createdAt).toLocaleDateString("en-US")}
                   title={post.title}
                   image={post.imageUrl}
